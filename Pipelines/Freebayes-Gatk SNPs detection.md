@@ -25,9 +25,9 @@ java -jar trimmomatic-0.39.jar PE 712A_1.fastq.gz 712A_2.fastq.gz 712A_1_paired.
 3. Map filtered reads to N. crassa.
 
 ```
-bowtie2  -x /home/pcamejo/Neurospora_Felipe/genome/Ncrassa -1 712A_1_paired.fastq.gz -2 712A_2_paired.fastq.gz -S 712A_N.crassa.sam
+bowtie2  -x Ncrassa -1 712A_1_paired.fastq.gz -2 712A_2_paired.fastq.gz -S 712A_N.crassa.sam
 
-bowtie2  -x /home/pcamejo/Neurospora_Felipe/genome/Ncrassa -1 712B_1_paired.fastq.gz -2 712B_2_paired.fastq.gz -S 712B_N.crassa.sam
+bowtie2  -x Ncrassa -1 712B_1_paired.fastq.gz -2 712B_2_paired.fastq.gz -S 712B_N.crassa.sam
 ```
 
 5. Convert sam file to bam, fix mate and sort.
