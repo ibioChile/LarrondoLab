@@ -1,39 +1,48 @@
 # Freebayes-Gatk SNPs detection
 
-This pipeline uses short sequencing reads to detect genomic variants (insertions, deletions and SNPs) in genome. This specific example, evaluates variants in two strains of Neuropora crassa. 
+This pipeline uses short sequencing reads to detect genomic variants (insertions, deletions and SNPs) in genome. This specific example evaluates variants in two strains (A & B) of Neuropora crassa. 
 
-1. 
+## Create conda environment to run the rest of programs.
 
-java -jar /homemejo/bin/Trimmomatic-0.39/trimmomatic-0.39.jar PE 712A_1.fastq.gz 712A_2.fastq.gz ../filtered_data/712A_1_paired.fastq.gz ../filtered_data/712A_1_unpaired.fastq.gz ../filtered_data/712A_2_paired.fastq.gz ../filtered_data/712A_2_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:10:30 MINLEN:50 AVGQUAL:25
+```
+conda create neurospora
+conda activate neurospora
+conda install -c bioconda samtools freebayes vcftools bowtie2
+```
 
+## Reads quality filtering and mapping.
 
-Input Read Pairs: 10320712 Both Surviving: 4796212 (46.47%) Forward Only Surviving: 4994977 (48.40%) Reverse Only Surviving: 86960 (0.84%) Dropped: 442563 (4.29%)
+1. Quality filtering using trimmomatic (100bp paired-end reads). 
 
-Input Read Pairs: 10682354 Both Surviving: 4686543 (43.87%) Forward Only Surviving: 5417798 (50.72%) Reverse Only Surviving: 87286 (0.82%) Dropped: 490727 (4.59%)
+```
+java -jar trimmomatic-0.39.jar PE 712A_1.fastq.gz 712A_2.fastq.gz 712A_1_paired.fastq.gz 712A_1_unpaired.fastq.gz 712A_2_paired.fastq.gz 712A_2_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:10:30 MINLEN:50 AVGQUAL:25
+```
 
+2. Index genome of Neurospora crassa.
 
-Bowtie2-build GCF_000182925.2_NC12_genomic.fna Ncrassa
+```bowtie2-build GCF_000182925.2_NC12_genomic.fna Ncrassa```
 
-bowtie2  -x /home/pcamejo/Neurospora_Felipe/genome/Ncrassa -1 /home/pcamejo/Neurospora_Felipe/filtered_data/712A_1_paired.fastq.gz -2 /home/pcamejo/Neurospora_Felipe/filtered_data/712A_2_paired.fastq.gz -S /home/pcamejo/Neurospora_Felipe/sam_files/712A_N.crassa.sam
+3. Map filtered reads to N. crassa.
 
-conda create freebayes
-conda install -c bioconda samtools
-conda install -c bioconda freebayes
-conda install -c bioconda vcftools 
+```
+bowtie2  -x /home/pcamejo/Neurospora_Felipe/genome/Ncrassa -1 712A_1_paired.fastq.gz -2 712A_2_paired.fastq.gz -S 712A_N.crassa.sam
 
-mkdir bam_files
-cd /home/pcamejo/Neurospora_Felipe/sam_files/
-for file in *.sam ; do base=${file##*/}; samtools view -S -b  $file > /home/pcamejo/Neurospora_Felipe/bam_files/${base%.*}.bam; done 
+bowtie2  -x /home/pcamejo/Neurospora_Felipe/genome/Ncrassa -1 712B_1_paired.fastq.gz -2 712B_2_paired.fastq.gz -S 712B_N.crassa.sam
+```
 
-cd bam_files
-for file in *.bam ; do base=${file##*/}; samtools sort -n -o ${base%.*}.sorted.bam $file ; done
+5. Convert sam file to bam, fix mate and sort.
 
-for file in *sorted.bam; do base=${file##*/}; samtools fixmate -m $file ${base%.*}.fixmate.bam;
-samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools markdup -r ${base%.*}.fixmate.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; done
+```
+for file in *.sam ; do base=${file##*/}; samtools view -S -b  $file > ${base%.*}.bam; samtools sort -n -o ${base%.*}.sorted.bam ${base%.*}.bam; samtools fixmate -m ${base%.*}.sorted.bam ${base%.*}.fixmate.bam;
+samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools markdup -r ${base%.*}.fixmate.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; samtools sort -o ${base%.*}.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam ;done 
+```
 
-for file in *sorted.dedup.bam; do base=${file##*/}; samtools sort -o ${base%.*}.sorted.bam $file ; done
+## Freebayes.
 
-freebayes -f /home/pcamejo/Neurospora_Felipe/genome/GCF_000182925.2_NC12_genomic.fna ‐p 1 ‐m 30 ‐q 20 ‐z 0.03 ‐F 0.7 ‐3 200 /home/pcamejo/Neurospora_Felipe/bam_files/712B_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > /home/pcamejo/Neurospora_Felipe/freebayes/712A_N.crassa.vcf
+```
+freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 -C 10 712A_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712A_N.crassa.vcf
+freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 -C 10 712B_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712B_N.crassa.vcf
+```
 
 bgzip -c 712B_N.crassa.vcf > 712B_N.crassa.vcf.gz
 tabix -f -p vcf 712B_N.crassa.vcf.gz
