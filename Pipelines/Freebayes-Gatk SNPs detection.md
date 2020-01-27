@@ -7,7 +7,7 @@ This pipeline uses short sequencing reads to detect genomic variants (insertions
 ```
 conda create neurospora
 conda activate neurospora
-conda install -c bioconda samtools freebayes vcftools bowtie2
+conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools
 ```
 
 ## Reads quality filtering and mapping.
@@ -39,25 +39,38 @@ samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools 
 
 ## Freebayes.
 
+1. Run freebayes.
+
 ```
-freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 -C 10 712A_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712A_N.crassa.vcf
-freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 -C 10 712B_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712B_N.crassa.vcf
+freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 712A_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712A_N.crassa.vcf
+freebayes -f GCF_000182925.2_NC12_genomic.fna -p 1 712B_N.crassa.sorted.fixmate.sorted.dedup.sorted.bam > 712B_N.crassa.vcf
 ```
 
+2. Select variants unique to each strain.
+
+```
 bgzip -c 712B_N.crassa.vcf > 712B_N.crassa.vcf.gz
 tabix -f -p vcf 712B_N.crassa.vcf.gz
 
 bgzip -c 712A_N.crassa.vcf > 712A_N.crassa.vcf.gz
 tabix -f -p vcf 712A_N.crassa.vcf.gz
 
-perl /home/pcamejo/bin/vcftools/src/perl/vcf-isec -c 712A_N.crassa.vcf.gz 712B_N.crassa.vcf.gz > 712A_N.unique.vcf
+perl /bin/vcftools/src/perl/vcf-isec -c 712A_N.crassa.vcf.gz 712B_N.crassa.vcf.gz > 712A_N.unique.vcf
 
-perl /home/pcamejo/bin/vcftools/src/perl/vcf-isec -c 712B_N.crassa.vcf.gz  712A_N.crassa.vcf.gz > 712B_N.unique.vcf
+perl /bin/vcftools/src/perl/vcf-isec -c 712B_N.crassa.vcf.gz 712A_N.crassa.vcf.gz > 712B_N.unique.vcf
+```
 
-/home/pcamejo/bin/vcftools/src/cpp/vcftools --vcf 712B_N.unique.vcf  --recode --recode-INFO-all --minQ 30 --out 712B_N.unique_filtered
+3. Filter variants by coverage (> 10 mapping reads) and quality (> 30).
 
+```
+bcftools view -i 'FORMAT/DP>10' 712B_N.unique.vcf > 712B_N.unique_filtDP.vcf 
+bcftools view -i 'FORMAT/DP>10' 712A_N.unique.vcf > 712A_N.unique_filtDP.vcf 
 
-- GATK
+vcftools --vcf 712A_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --out 712A_N.unique_filtered
+vcftools --vcf 712B_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --out 712B_N.unique_filtered
+```
+
+## GATK.
 
 gatk CreateSequenceDictionary -R GCF_000182925.2_NC12_genomic.fna
 
