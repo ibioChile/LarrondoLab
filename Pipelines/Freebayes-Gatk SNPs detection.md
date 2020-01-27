@@ -1,8 +1,8 @@
 # Freebayes-GATK SNPs detection
 
-This pipeline uses short sequencing reads to detect genomic variants (insertions, deletions and SNPs) in genome. This specific example evaluates variants in two strains (A & B) of Neuropora crassa. 
+This pipeline uses short sequencing reads to detect genomic variants (insertions, deletions and SNPs) in genome. Here, we combine the output of two known variant callers, freebayes and GATK, to generate a conservative list of variants. This specific example evaluates variants in two strains (A & B) of Neuropora crassa. 
 
-## Create conda environment to run the rest of programs.
+## Create conda environment to run the rest of programs
 
 ```
 conda create neurospora
@@ -10,7 +10,7 @@ conda activate neurospora
 conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools bedops bedtools
 ```
 
-## Reads quality filtering and mapping.
+## Reads quality filtering and mapping
 
 1. Quality filtering using trimmomatic (100bp paired-end reads). 
 
@@ -37,7 +37,7 @@ for file in *.sam ; do base=${file##*/}; samtools view -S -b  $file > ${base%.*}
 samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools markdup -r ${base%.*}.fixmate.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; samtools sort -o ${base%.*}.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam ;done 
 ```
 
-## Freebayes.
+## Freebayes
 
 1. Run [freebayes](https://github.com/ekg/freebayes) for genomic variants detection.
 
@@ -70,7 +70,7 @@ vcftools --vcf 712A_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --
 vcftools --vcf 712B_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --out 712B_N.unique_filtered
 ```
 
-## GATK.
+## GATK
 
 1. Index genome file to run [GATK](https://gatk.broadinstitute.org/hc/en-us) for genomic variants detection.
 
@@ -124,7 +124,7 @@ vcftools --vcf 712A_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --
 vcftools --vcf 712B_N.unique_filtDP.vcf  --recode --recode-INFO-all --minQ 30 --out 712B_N.unique_filtered
 ```
 
-## Merge freebayes and GATK results.
+## Merging freebayes and GATK results
 
 1. Prepare files for merging.
 
@@ -144,7 +144,7 @@ perl /bin/vcftools/src/perl/vcf-isec /freebayes/712A_N.unique_filtered.recode.vc
 perl /bin/vcftools/src/perl/vcf-isec /freebayes/712B_N.unique_filtered.recode.vcf.gz /gatk/712B_N.unique_filtered.recode.vcf.gz --force > 712B_N.unique_filt_merged.vcf
 ```
 
-## Intersect results with gene information.
+## Intersecting results with gene information
 
 1. Create bed file of gene position in genome.
 
