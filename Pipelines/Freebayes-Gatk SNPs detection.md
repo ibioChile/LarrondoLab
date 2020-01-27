@@ -2,7 +2,7 @@
 
 This pipeline uses short sequencing reads to detect genomic variants (insertions, deletions and SNPs) in genome. Here, we combine the output of two known variant callers, freebayes and GATK, to generate a conservative list of variants. This specific example evaluates variants in two strains (A & B) of Neuropora crassa. 
 
-## Create conda environment to run the rest of programs
+## Create conda environment to run the programs needed
 
 ```
 conda create neurospora
