@@ -30,7 +30,7 @@ bowtie2  -x Ncrassa -1 712A_1_paired.fastq.gz -2 712A_2_paired.fastq.gz -S 712A_
 bowtie2  -x Ncrassa -1 712B_1_paired.fastq.gz -2 712B_2_paired.fastq.gz -S 712B_N.crassa.sam
 ```
 
-5. Convert sam file to bam, fix mate and sort.
+5. Convert sam file to bam, fix mate, remove duplicates and sort.
 
 ```
 for file in *.sam ; do base=${file##*/}; samtools view -S -b  $file > ${base%.*}.bam; samtools sort -n -o ${base%.*}.sorted.bam ${base%.*}.bam; samtools fixmate -m ${base%.*}.sorted.bam ${base%.*}.fixmate.bam;
