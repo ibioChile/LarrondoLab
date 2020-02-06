@@ -5,7 +5,7 @@ This pipeline uses short sequencing reads to detect genomic variants (insertions
 ## Create conda environment to run the programs needed
 
 ```
-conda create neurospora
+conda create -n neurospora
 conda activate neurospora
 conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools bedops bedtools
 ```
