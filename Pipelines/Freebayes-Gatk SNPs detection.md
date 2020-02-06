@@ -7,7 +7,7 @@ This pipeline uses short sequencing reads to detect genomic variants (insertions
 ```
 conda create -n neurospora
 conda activate neurospora
-conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools bedops bedtools fastqc trimmomatic gatk
+conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools bedops bedtools fastqc trimmomatic gatk4
 ```
 
 ## Reads quality filtering and mapping
