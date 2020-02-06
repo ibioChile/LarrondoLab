@@ -22,7 +22,7 @@ fastqc *
 2. Quality filtering using trimmomatic (100bp paired-end reads). 
 
 ```
-java -jar trimmomatic-0.39.jar PE 712A_1.fastq.gz 712A_2.fastq.gz 712A_1_paired.fastq.gz 712A_1_unpaired.fastq.gz 712A_2_paired.fastq.gz 712A_2_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:10:30 MINLEN:50 AVGQUAL:25
+trimmomatic PE 712A_1.fastq.gz 712A_2.fastq.gz 712A_1_paired.fastq.gz 712A_1_unpaired.fastq.gz 712A_2_paired.fastq.gz 712A_2_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:10:30 MINLEN:50 AVGQUAL:25
 ```
 
 3. Index [genome of Neurospora crassa](https://www.ncbi.nlm.nih.gov/genome/?term=txid5141[orgn]).
