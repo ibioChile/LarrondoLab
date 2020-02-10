@@ -159,20 +159,46 @@ bcftools merge ../freebayes/712A_N.unique_filtered.recode.vcf.gz ../gatk/712A_N.
 bcftools merge ../freebayes/712B_N.unique_filtered.recode.vcf.gz ../gatk/712B_N.unique_filtered.recode.vcf.gz > 712B_N.unique.filt_merged.vcf
 ```
 
-## Intersecting results with gene information
+## Infering the functional effect of variants.
 
-1. Create bed file of gene position in genome.
+We used the prediction toolbox of [SNPEff](http://snpeff.sourceforge.net) to analyze the effect of SNPS/indels/deletions in the function of proteins.
 
-```
-convert2bed -i gff < GCF_000182925.2_NC12_genomic.gff > GCF_000182925.2_NC12_genomic.bed
+1. Download SNPEff folder.
 
-awk '$8=="gene"{print}' GCF_000182925.2_NC12_genomic.bed > GCF_000182925.2_NC12_genes.bed
-```
-
-2. Intersect variants results with gene information.
+2. Create a folder 'data'. Inside this folder, create another folder with the genome's name. Move Genbank file here and change the name to 'genes.gbk'.
 
 ```
-bedtools intersect -a 712A_N.unique_filt_merged.vcf -b GCF_000182925.2_NC12_genes.bed -wb > 712A_N.unique_filt_merged_genes.bed
+mkdir data
+cd data
+mkdir N.crassa_NC12
+cp N.crassa_NC12.gbk genes.gbk
+```
 
-bedtools intersect -a 712B_N.unique_filt_merged.vcf -b GCF_000182925.2_NC12_genes.bed -wb > 712B_N.unique_filt_merged_genes.bed
+2. Add the following line to the 'snpEff.config' file inside SNPeff folder.
+
+```
+nano snpEff.config
+```
+
+```
+#---
+# Non-standard Databases
+#---
+
+# N.crassa genome, version NC12
+N.crassa_NC12.genome : N.crassa_NC12
+```
+
+3. Create and format database.
+
+```
+java -jar snpEff.jar build -genbank -v N.crassa_NC12
+```
+
+4. Run SNPEff with vcf output file.
+
+```
+java -Xmx4g -jar snpEff.jar -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -lof -s 712A_N.unique_snpEff_summary.html N.crassa_NC12 712A_N.unique_filt_merged.vcf > 712A_N.unique_filt_merged_snpEff.vcf 
+
+java -Xmx4g -jar snpEff.jar -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -lof -s 712B_N.unique_snpEff_summary.html N.crassa_NC12 712B_N.unique_filt_merged.vcf > 712B_N.unique_filt_merged_snpEff.vcf 
 ```
