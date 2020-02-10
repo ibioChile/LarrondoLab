@@ -146,9 +146,9 @@ tabix -f -p vcf 712B_N.unique_filtered.recode.vcf.gz
 2. Generate file with variants detected by the two methods.
 
 ```
-perl /bin/vcftools/src/perl/vcf-isec /freebayes/712A_N.unique_filtered.recode.vcf.gz /gatk/712A_N.unique_filtered.recode.vcf.gz --force > 712A_N.unique_filt_merged.vcf
+perl /bin/vcftools/src/perl/vcf-isec /freebayes/712A_N.unique_filtered.recode.vcf.gz /gatk/712A_N.unique_filtered.recode.vcf.gz --force > 712A_N.unique_filt_isec.vcf
 
-perl /bin/vcftools/src/perl/vcf-isec /freebayes/712B_N.unique_filtered.recode.vcf.gz /gatk/712B_N.unique_filtered.recode.vcf.gz --force > 712B_N.unique_filt_merged.vcf
+perl /bin/vcftools/src/perl/vcf-isec /freebayes/712B_N.unique_filtered.recode.vcf.gz /gatk/712B_N.unique_filtered.recode.vcf.gz --force > 712B_N.unique_filt_isec.vcf
 ```
 
 3. Generate file with variants with variants detected by at least one method.
