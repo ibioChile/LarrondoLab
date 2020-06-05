@@ -7,7 +7,7 @@ This pipeline uses short sequencing reads to detect genomic variants (insertions
 ```
 conda create -n neurospora
 conda activate neurospora
-conda install -c bioconda samtools freebayes vcftools bowtie2 bcftools bedops bedtools fastqc trimmomatic gatk4
+conda install -c bioconda samtools=1.9 freebayes vcftools bowtie2 bcftools bedops bedtools fastqc trimmomatic gatk4
 ```
 
 ## Reads quality filtering and mapping
@@ -41,7 +41,7 @@ bowtie2  -x Ncrassa -1 712B_1_paired.fastq.gz -2 712B_2_paired.fastq.gz -S 712B_
 
 ```
 for file in *.sam ; do base=${file##*/}; samtools view -S -b  $file > ${base%.*}.bam; samtools sort -n -o ${base%.*}.sorted.bam ${base%.*}.bam; samtools fixmate -m ${base%.*}.sorted.bam ${base%.*}.fixmate.bam;
-samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools markdup -r ${base%.*}.fixmate.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; samtools sort -o ${base%.*}.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam ;done 
+samtools sort ${base%.*}.fixmate.bam -o ${base%.*}.fixmate.sorted.bam; samtools markdup -r ${base%.*}.fixmate.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; samtools sort -o ${base%.*}.sorted.bam ${base%.*}.fixmate.sorted.dedup.bam; samtools index ${base%.*}.fixmate.sorted.dedup.bam; done 
 ```
 
 ## Freebayes
